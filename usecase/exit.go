@@ -29,7 +29,7 @@ func (u *usecase) Exit(input *ExitInput) error {
 		}
 
 		// 退室処理
-		return u.recordRepo.Exit(tx, latestRecord, input.ExitAt)
+		return u.recordRepo.Exit(tx, latestRecord)
 	})
 	return err
 }

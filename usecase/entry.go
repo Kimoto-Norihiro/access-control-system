@@ -2,14 +2,12 @@ package usecase
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 )
 
 type EntryInput struct {
-	UserID  int       `json:"user_id" binding:"required"`
-	EntryAt time.Time `json:"entry_at" binding:"required"`
+	UserID int `json:"user_id" binding:"required"`
 }
 
 func (u *usecase) Entry(input *EntryInput) error {
@@ -23,7 +21,7 @@ func (u *usecase) Entry(input *EntryInput) error {
 			return errors.New("already entered")
 		}
 
-		return u.recordRepo.Entry(tx, input.UserID, input.EntryAt)
+		return u.recordRepo.Entry(tx, input.UserID)
 	})
 
 	return err

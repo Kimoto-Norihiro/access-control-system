@@ -12,9 +12,9 @@ type RecordRepository interface {
 	// 最新の在室情報取得
 	GetLatestRecord(db *gorm.DB, userID int) (*model.Record, error)
 	// 入室
-	Entry(tx *gorm.DB, userID int, entryAt time.Time) error
+	Entry(tx *gorm.DB, userID int) error
 	// 退室
-	Exit(tx *gorm.DB, record *model.Record, exitAt time.Time) error
+	Exit(tx *gorm.DB, record *model.Record) error
 }
 
 type recordRepository struct {
@@ -33,10 +33,15 @@ func (r *recordRepository) GetLatestRecord(db *gorm.DB, userID int) (*model.Reco
 	return &record, nil
 }
 
-func (r *recordRepository) Entry(tx *gorm.DB, userID int, entryAt time.Time) error {
+func (r *recordRepository) Entry(tx *gorm.DB, userID int) error {
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		panic(err)
+	}
+
 	record := &model.Record{
 		UserID:  userID,
-		EntryAt: entryAt,
+		EntryAt: time.Now().In(jst),
 	}
 
 	if err := tx.Create(record).Error; err != nil {
@@ -46,8 +51,14 @@ func (r *recordRepository) Entry(tx *gorm.DB, userID int, entryAt time.Time) err
 	return nil
 }
 
-func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record, exitAt time.Time) error {
-	record.ExitAt = &exitAt
+func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record) error {
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		panic(err)
+	}
+
+	now := time.Now().In(jst)
+	record.ExitAt = &now
 	if err := tx.Save(record).Error; err != nil {
 		return err
 	}
