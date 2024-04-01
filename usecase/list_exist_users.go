@@ -1,7 +1,11 @@
 package usecase
 
-func (u *usecase) ListExistUsers() ([]string, error) {
-	users, err := u.userRepo.ListExistUsers(u.db)
+type ListExistUsersOutput struct {
+	UserNames []string `json:"user_names"`
+}
+
+func (u *usecase) ListExistUsers() (*ListExistUsersOutput, error) {
+	users, err := u.recordRepo.ListExistUsers(u.db)
 	if err != nil {
 		return nil, err
 	}
@@ -11,5 +15,7 @@ func (u *usecase) ListExistUsers() ([]string, error) {
 		userNames = append(userNames, user.Name)
 	}
 
-	return userNames, nil
+	return &ListExistUsersOutput{
+		UserNames: userNames,
+	}, nil
 }

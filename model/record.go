@@ -7,4 +7,5 @@ type Record struct {
 	EntryAt time.Time  `gorm:"column:entry_at"`
 	ExitAt  *time.Time `gorm:"column:exit_at"`
 	UserID  int        `gorm:"column:user_id"`
+	User    User       `gorm:"foreignKey:UserID"`
 }

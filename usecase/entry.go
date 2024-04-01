@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 
+	"github.com/Kimoto-Norihiro/access-control-system/model"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +11,12 @@ type EntryInput struct {
 	UserID int `json:"user_id" binding:"required"`
 }
 
-func (u *usecase) Entry(input *EntryInput) error {
+type EntryOutput struct {
+	UserName string `json:"user_name"`
+}
+
+func (u *usecase) Entry(input *EntryInput) (*EntryOutput, error) {
+	var user *model.User
 	err := u.db.Transaction(func(tx *gorm.DB) error {
 		latestRecord, err := u.recordRepo.GetLatestRecord(tx, input.UserID)
 		if err != nil {
@@ -21,8 +27,19 @@ func (u *usecase) Entry(input *EntryInput) error {
 			return errors.New("already entered")
 		}
 
-		return u.recordRepo.Entry(tx, input.UserID)
+		user, err = u.recordRepo.Entry(tx, input.UserID)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
 
-	return err
+	if user == nil {
+		return nil, err
+	}
+
+	return &EntryOutput{
+		UserName: user.Name,
+	}, err
 }

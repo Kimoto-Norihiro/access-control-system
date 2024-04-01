@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Kimoto-Norihiro/access-control-system/model"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +13,12 @@ type ExitInput struct {
 	ExitAt time.Time `json:"exit_at" binding:"required"`
 }
 
-func (u *usecase) Exit(input *ExitInput) error {
+type ExitOutput struct {
+	UserName string `json:"user_name"`
+}
+
+func (u *usecase) Exit(input *ExitInput) (*ExitOutput, error) {
+	var user *model.User
 	err := u.db.Transaction(func(tx *gorm.DB) error {
 		// 最新の在室情報取得
 		latestRecord, err := u.recordRepo.GetLatestRecord(tx, input.UserID)
@@ -29,7 +35,19 @@ func (u *usecase) Exit(input *ExitInput) error {
 		}
 
 		// 退室処理
-		return u.recordRepo.Exit(tx, latestRecord)
+		user, err = u.recordRepo.Exit(tx, latestRecord)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	})
-	return err
+
+	if user == nil {
+		return nil, err
+	}
+
+	return &ExitOutput{
+		UserName: user.Name,
+	}, err
 }

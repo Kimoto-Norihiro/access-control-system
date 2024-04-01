@@ -10,11 +10,11 @@ type Usecase interface {
 	// ユーザー作成
 	CreateUser(input *CreateUserInput) error
 	// 入室
-	Entry(input *EntryInput) error
+	Entry(input *EntryInput) (*EntryOutput, error)
 	// 退室
-	Exit(input *ExitInput) error
+	Exit(input *ExitInput) (*ExitOutput, error)
 	// 在室しているユーザーの情報を取得
-	ListExistUsers() ([]string, error)
+	ListExistUsers() (*ListExistUsersOutput, error)
 }
 
 type usecase struct {
