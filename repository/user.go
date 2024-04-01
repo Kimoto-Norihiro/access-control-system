@@ -23,7 +23,6 @@ func NewUserRepository() UserRepository {
 func (r *userRepository) CreateUser(tx *gorm.DB, name string) error {
 	user := &model.User{
 		Name: name,
-		IsExist: false,
 	}
 
 	err := tx.Create(user).Error
