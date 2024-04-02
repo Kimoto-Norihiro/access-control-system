@@ -3,7 +3,6 @@ package usecase
 import (
 	"errors"
 
-	"github.com/Kimoto-Norihiro/access-control-system/model"
 	"gorm.io/gorm"
 )
 
@@ -13,33 +12,33 @@ type EntryInput struct {
 
 type EntryOutput struct {
 	UserName string `json:"user_name"`
+	EntryAt  string `json:"entry_at"`
 }
 
 func (u *usecase) Entry(input *EntryInput) (*EntryOutput, error) {
-	var user *model.User
-	err := u.db.Transaction(func(tx *gorm.DB) error {
-		latestRecord, err := u.recordRepo.GetLatestRecord(tx, input.UserID)
-		if err != nil {
-			return err
-		}
+	var o *EntryOutput
 
-		if latestRecord.ExitAt == nil {
+	err := u.db.Transaction(func(tx *gorm.DB) error {
+		// 最新の在室情報取得
+		latestRecord, _ := u.recordRepo.GetLatestRecord(tx, input.UserID)
+
+		// すでに入室している場合はエラー
+		if latestRecord != nil && latestRecord.ExitAt == nil {
 			return errors.New("already entered")
 		}
 
-		user, err = u.recordRepo.Entry(tx, input.UserID)
+		record, err := u.recordRepo.Entry(tx, input.UserID)
 		if err != nil {
 			return err
+		}
+
+		o = &EntryOutput{
+			UserName: record.User.Name,
+			EntryAt:  record.EntryAt.Format("2006-01-02 15:04:05"),
 		}
 
 		return nil
 	})
 
-	if user == nil {
-		return nil, err
-	}
-
-	return &EntryOutput{
-		UserName: user.Name,
-	}, err
+	return o, err
 }

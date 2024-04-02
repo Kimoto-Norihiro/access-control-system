@@ -9,6 +9,8 @@ import (
 type UserRepository interface {
 	// ユーザー登録
 	CreateUser(tx *gorm.DB, name string) error
+	// ユーザー一覧
+	ListUsers(db *gorm.DB) (*[]model.User, error)
 	// ユーザーの月間在室時間の取得
 	GetUserMonthlyAttendanceTime(db *gorm.DB, userID int) error
 }
@@ -31,6 +33,15 @@ func (r *userRepository) CreateUser(tx *gorm.DB, name string) error {
 	}
 
 	return nil
+}
+
+func (r *userRepository) ListUsers(db *gorm.DB) (*[]model.User, error) {
+	var users []model.User
+	if err := db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
 }
 
 func (r *userRepository) GetUserMonthlyAttendanceTime(db *gorm.DB, userID int) error {

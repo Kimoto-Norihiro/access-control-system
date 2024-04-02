@@ -9,6 +9,8 @@ import (
 type Usecase interface {
 	// ユーザー作成
 	CreateUser(input *CreateUserInput) error
+	// ユーザー一覧
+	ListUsers() (*ListUsersOutput, error)
 	// 入室
 	Entry(input *EntryInput) (*EntryOutput, error)
 	// 退室

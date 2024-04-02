@@ -22,8 +22,8 @@ func NewController(db *gorm.DB) *controller {
 	teamsClient := teams.NewClient()
 
 	return &controller{
-		db:      db,
-		usecase: usecase,
+		db:          db,
+		usecase:     usecase,
 		teamsClient: teamsClient,
 	}
 }
@@ -44,6 +44,17 @@ func (c *controller) CreateUser(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"message": "success"})
 }
 
+// ユーザー一覧
+func (c *controller) ListUsers(ctx *gin.Context) {
+	output, err := c.usecase.ListUsers()
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"users": output.Users})
+}
+
 // 入室
 func (c *controller) Entry(ctx *gin.Context) {
 	var input usecase.EntryInput
@@ -58,7 +69,6 @@ func (c *controller) Entry(ctx *gin.Context) {
 		return
 	}
 
-	// teamsに通知
 	listOutput, err := c.usecase.ListExistUsers()
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
@@ -66,7 +76,7 @@ func (c *controller) Entry(ctx *gin.Context) {
 	}
 
 	// teamsに通知
-	if err := c.teamsClient.SendEntryMessage(output.UserName, listOutput.UserNames); err != nil {
+	if err := c.teamsClient.SendEntryMessage(output.UserName, output.EntryAt, listOutput.UserNames); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -88,7 +98,7 @@ func (c *controller) Exit(ctx *gin.Context) {
 		return
 	}
 
-	// teamsに通知
+	// 在室しているユーザーの情報を取得
 	listOutput, err := c.usecase.ListExistUsers()
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
@@ -96,7 +106,7 @@ func (c *controller) Exit(ctx *gin.Context) {
 	}
 
 	// teamsに通知
-	if err := c.teamsClient.SendExitMessage(output.UserName, listOutput.UserNames); err != nil {
+	if err := c.teamsClient.SendExitMessage(output.UserName, output.ExitAt, listOutput.UserNames); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

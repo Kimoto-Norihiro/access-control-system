@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -12,9 +13,9 @@ type RecordRepository interface {
 	// 最新の在室情報取得
 	GetLatestRecord(db *gorm.DB, userID int) (*model.Record, error)
 	// 入室
-	Entry(tx *gorm.DB, userID int) (*model.User, error)
+	Entry(tx *gorm.DB, userID int) (*model.Record, error)
 	// 退室
-	Exit(tx *gorm.DB, record *model.Record) (*model.User, error)
+	Exit(tx *gorm.DB, record *model.Record) (*model.Record, error)
 	// 在室しているユーザーの情報を取得
 	ListExistUsers(db *gorm.DB) (*[]model.User, error)
 }
@@ -28,14 +29,18 @@ func NewRecordRepository() RecordRepository {
 
 func (r *recordRepository) GetLatestRecord(db *gorm.DB, userID int) (*model.Record, error) {
 	var record model.Record
-	if err := db.Where("user_id = ?", userID).Last(&record).Error; err != nil {
+	if err := db.Where("user_id = ?", userID).Preload("User").Last(&record).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
 	return &record, nil
 }
 
-func (r *recordRepository) Entry(tx *gorm.DB, userID int) (*model.User, error) {
+func (r *recordRepository) Entry(tx *gorm.DB, userID int) (*model.Record, error) {
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		panic(err)
@@ -50,10 +55,14 @@ func (r *recordRepository) Entry(tx *gorm.DB, userID int) (*model.User, error) {
 		return nil, err
 	}
 
-	return &record.User, nil
+	if err := tx.Preload("User").First(record, record.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return record, nil
 }
 
-func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record) (*model.User, error) {
+func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record) (*model.Record, error) {
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		panic(err)
@@ -61,17 +70,17 @@ func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record) (*model.User,
 
 	now := time.Now().In(jst)
 	record.ExitAt = &now
-	if err := tx.Save(record).Error; err != nil {
+	if err := tx.Save(record).Preload("User").Error; err != nil {
 		return nil, err
 	}
 
-	return &record.User, nil
+	return record, nil
 }
 
 func (r *recordRepository) ListExistUsers(db *gorm.DB) (*[]model.User, error) {
 	var records []model.Record
 	// 入室順で取得
-	if err := db.Where("exit_at IS NULL").Order("entry_at").Find(&records).Error; err != nil {
+	if err := db.Where("exit_at IS NULL").Preload("User").Order("entry_at").Find(&records).Error; err != nil {
 		return nil, err
 	}
 
