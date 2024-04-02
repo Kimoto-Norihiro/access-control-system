@@ -12,7 +12,7 @@ type Usecase interface {
 	// ユーザー一覧
 	ListUsers() (*ListUsersOutput, error)
 	// 入室
-	Entry(input *EntryInput) (*EntryOutput, error)
+	Enter(input *EnterInput) (*EnterOutput, error)
 	// 退室
 	Exit(input *ExitInput) (*ExitOutput, error)
 	// 在室しているユーザーの情報を取得

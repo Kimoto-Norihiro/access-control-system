@@ -56,14 +56,14 @@ func (c *controller) ListUsers(ctx *gin.Context) {
 }
 
 // 入室
-func (c *controller) Entry(ctx *gin.Context) {
-	var input usecase.EntryInput
+func (c *controller) Enter(ctx *gin.Context) {
+	var input usecase.EnterInput
 	if err := ctx.BindJSON(&input); err != nil {
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	output, err := c.usecase.Entry(&input)
+	output, err := c.usecase.Enter(&input)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -76,7 +76,7 @@ func (c *controller) Entry(ctx *gin.Context) {
 	}
 
 	// teamsに通知
-	if err := c.teamsClient.SendEntryMessage(output.UserName, output.EntryAt, listOutput.UserNames); err != nil {
+	if err := c.teamsClient.SendEnterMessage(output.UserName, output.EnterAt, listOutput.UserNames); err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

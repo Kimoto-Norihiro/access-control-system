@@ -6,17 +6,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type EntryInput struct {
+type EnterInput struct {
 	UserID int `json:"user_id" binding:"required"`
 }
 
-type EntryOutput struct {
+type EnterOutput struct {
 	UserName string `json:"user_name"`
-	EntryAt  string `json:"entry_at"`
+	EnterAt  string `json:"enter_at"`
 }
 
-func (u *usecase) Entry(input *EntryInput) (*EntryOutput, error) {
-	var o *EntryOutput
+func (u *usecase) Enter(input *EnterInput) (*EnterOutput, error) {
+	var o *EnterOutput
 
 	err := u.db.Transaction(func(tx *gorm.DB) error {
 		// 最新の在室情報取得
@@ -27,14 +27,14 @@ func (u *usecase) Entry(input *EntryInput) (*EntryOutput, error) {
 			return errors.New("already entered")
 		}
 
-		record, err := u.recordRepo.Entry(tx, input.UserID)
+		record, err := u.recordRepo.Enter(tx, input.UserID)
 		if err != nil {
 			return err
 		}
 
-		o = &EntryOutput{
+		o = &EnterOutput{
 			UserName: record.User.Name,
-			EntryAt:  record.EntryAt.Format("2006-01-02 15:04:05"),
+			EnterAt:  record.EnterAt.Format("2006-01-02 15:04:05"),
 		}
 
 		return nil

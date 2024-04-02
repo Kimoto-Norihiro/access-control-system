@@ -13,7 +13,7 @@ type RecordRepository interface {
 	// 最新の在室情報取得
 	GetLatestRecord(db *gorm.DB, userID int) (*model.Record, error)
 	// 入室
-	Entry(tx *gorm.DB, userID int) (*model.Record, error)
+	Enter(tx *gorm.DB, userID int) (*model.Record, error)
 	// 退室
 	Exit(tx *gorm.DB, record *model.Record) (*model.Record, error)
 	// 在室しているユーザーの情報を取得
@@ -40,7 +40,7 @@ func (r *recordRepository) GetLatestRecord(db *gorm.DB, userID int) (*model.Reco
 	return &record, nil
 }
 
-func (r *recordRepository) Entry(tx *gorm.DB, userID int) (*model.Record, error) {
+func (r *recordRepository) Enter(tx *gorm.DB, userID int) (*model.Record, error) {
 	jst, err := time.LoadLocation("Asia/Tokyo")
 	if err != nil {
 		panic(err)
@@ -48,7 +48,7 @@ func (r *recordRepository) Entry(tx *gorm.DB, userID int) (*model.Record, error)
 
 	record := &model.Record{
 		UserID:  userID,
-		EntryAt: time.Now().In(jst),
+		EnterAt: time.Now().In(jst),
 	}
 
 	if err := tx.Create(record).Error; err != nil {
@@ -80,7 +80,7 @@ func (r *recordRepository) Exit(tx *gorm.DB, record *model.Record) (*model.Recor
 func (r *recordRepository) ListExistUsers(db *gorm.DB) (*[]model.User, error) {
 	var records []model.Record
 	// 入室順で取得
-	if err := db.Where("exit_at IS NULL").Preload("User").Order("entry_at").Find(&records).Error; err != nil {
+	if err := db.Where("exit_at IS NULL").Preload("User").Order("enter_at").Find(&records).Error; err != nil {
 		return nil, err
 	}
 

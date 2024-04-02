@@ -31,7 +31,7 @@ func main() {
 	// ユーザー一覧
 	r.GET("/users", controller.ListUsers)
 	// 入室
-	r.POST("/entry", controller.Entry)
+	r.POST("/enter", controller.Enter)
 	// 退室
 	r.PUT("/exit", controller.Exit)
 

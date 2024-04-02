@@ -3,6 +3,7 @@ package teams
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
@@ -21,7 +22,7 @@ func NewClient() *TeamsNotify {
 	}
 }
 
-func (t *TeamsNotify) SendEntryMessage(entryMember string, entryAt string, members []string) error {
+func (t *TeamsNotify) SendEnterMessage(enterMember string, enterAt string, members []string) error {
 	msgCard := messagecard.NewMessageCard()
 	msgCard.ThemeColor = "005B94"
 	msgCard.Title = "入室通知 （テスト）"
@@ -29,9 +30,9 @@ func (t *TeamsNotify) SendEntryMessage(entryMember string, entryAt string, membe
 
 	msgSection := messagecard.NewSection()
 	msgSection.ActivitySubtitle = "入室者情報"
-	msgSection.ActivityText = entryMember
-	msgSection.ActivitySubtitle = "入室時刻: "+entryAt
-	msgSection.ActivityImage = "https://icon-library.com/images/enter-icon-png/enter-icon-png-5.jpg"
+	msgSection.ActivityText = enterMember
+	msgSection.ActivitySubtitle = "入室時刻: " + enterAt
+	msgSection.ActivityImage = filepath.Join("images", "enter.JPG")
 
 	if len(members) == 0 {
 		msgSection.Text = "現在在室者はいません"
@@ -54,7 +55,7 @@ func (t *TeamsNotify) SendExitMessage(exitMember string, exitAt string, members 
 	msgSection.ActivitySubtitle = "退室者情報"
 	msgSection.ActivityText = exitMember
 	msgSection.ActivitySubtitle = "退室時刻: " + exitAt
-	msgSection.ActivityImage = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/PublicInformationSymbol_EmergencyExit.svg/1200px-PublicInformationSymbol_EmergencyExit.svg.png"
+	msgSection.ActivityImage = filepath.Join("images", "exit.JPG")
 
 	if len(members) == 0 {
 		msgSection.Text = "現在在室者はいません"
