@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 
+	"github.com/Kimoto-Norihiro/access-control-system/model"
 	"gorm.io/gorm"
 )
 
@@ -11,8 +12,9 @@ type EnterInput struct {
 }
 
 type EnterOutput struct {
-	UserName string `json:"user_name"`
-	EnterAt  string `json:"enter_at"`
+	UserName string       `json:"user_name"`
+	EnterAt  string       `json:"enter_at"`
+	Record   model.Record `json:"record"`
 }
 
 func (u *usecase) Enter(input *EnterInput) (*EnterOutput, error) {
@@ -35,6 +37,7 @@ func (u *usecase) Enter(input *EnterInput) (*EnterOutput, error) {
 		o = &EnterOutput{
 			UserName: record.User.Name,
 			EnterAt:  record.EnterAt.Format("2006-01-02 15:04:05"),
+			Record:   *record,
 		}
 
 		return nil

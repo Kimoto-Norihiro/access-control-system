@@ -11,6 +11,8 @@ type Usecase interface {
 	CreateUser(input *CreateUserInput) error
 	// ユーザー一覧
 	ListUsers() (*ListUsersOutput, error)
+	// 最新の在室情報取得
+	GetLatestRecord(input *GetLatestRecordInput) (*GetLatestRecordOutput, error)
 	// 入室
 	Enter(input *EnterInput) (*EnterOutput, error)
 	// 退室

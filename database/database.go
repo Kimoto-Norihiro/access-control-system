@@ -15,6 +15,7 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
+	// db.Migrator().DropTable(&model.User{}, &model.Record{})
 	db.AutoMigrate(&model.User{}, &model.Record{})
 
 	return db, nil

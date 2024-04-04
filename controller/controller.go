@@ -55,6 +55,27 @@ func (c *controller) ListUsers(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"users": output.Users})
 }
 
+func (c *controller) GetLatestRecord(ctx *gin.Context) {
+	var input usecase.GetLatestRecordInput
+	if err := ctx.BindJSON(&input); err != nil {
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	output, err := c.usecase.GetLatestRecord(&input)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if output == nil {
+		ctx.JSON(200, gin.H{"record": nil})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"record": output.Record})
+}
+
 // 入室
 func (c *controller) Enter(ctx *gin.Context) {
 	var input usecase.EnterInput
@@ -81,7 +102,7 @@ func (c *controller) Enter(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, gin.H{"message": "success"})
+	ctx.JSON(200, gin.H{"record": output.Record})
 }
 
 // 退室

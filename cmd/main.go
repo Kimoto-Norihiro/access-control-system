@@ -30,6 +30,8 @@ func main() {
 	r.POST("/user", controller.CreateUser)
 	// ユーザー一覧
 	r.GET("/users", controller.ListUsers)
+	// 最新の在室情報取得
+	r.POST("/latest_record", controller.GetLatestRecord)
 	// 入室
 	r.POST("/enter", controller.Enter)
 	// 退室
